@@ -5,7 +5,7 @@ usage: steg.py encode [-h] [-o OUTPUTFILE] file message
 
 positional arguments:
   file                  PNG file to encode
-  message               Message to encode
+  message               Data to encode as file or string
 
 optional arguments:
   -h, --help            show this help message and exit

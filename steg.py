@@ -3,6 +3,8 @@
 from bitarray import bitarray
 from PIL import Image
 import argparse
+import os
+import warnings
 
 def encode_value(value, data):
     if data >= 2 or data < 0: 
@@ -48,7 +50,9 @@ def encode_image(im, message):
                 newpixel.append(encode_value(value, 0))
             else:
                 newpixel.append(value)
-        new_data.append(tuple(newpixel))        
+        new_data.append(tuple(newpixel))
+    if counter < bits.length():
+        warnings.warn("The data too large for image, only stored {:,} bits out of {:,}".format(counter, bits.length()))
     im.putdata(new_data) 
 
 def main():
@@ -56,17 +60,21 @@ def main():
     
     subparsers = parser.add_subparsers(dest='command')
 
-    parser_decode = subparsers.add_parser('decode')
+    parser_decode = subparsers.add_parser('decode', help="Decode an image")
     parser_decode.add_argument("file", help="PNG file to decode")
 
-    parser_encode = subparsers.add_parser('encode')
+    parser_encode = subparsers.add_parser('encode', help="Encode an image")
     parser_encode.add_argument("-o", "--outputfile", help="Specify output file for endoded Image")
     parser_encode.add_argument("file", help="PNG file to encode")
-    parser_encode.add_argument("message", help="Message to encode")
+    parser_encode.add_argument("message", help="Data to encode as file or string")
 
     args = parser.parse_args()
     
     if args.command == 'encode':
+        if os.path.isfile(args.message):
+            f = open(args.message, 'r')
+            args.message = f.read()
+
         im = Image.open(args.file)
         im = im.convert('RGB')
 
@@ -74,9 +82,10 @@ def main():
 
         if args.outputfile:
             im.save(args.outputfile, compress_level=0)
+            print "Encoded image saved as " + args.outputfile
         else:
             im.save('encoded_' + args.file, compress_level=0)
-
+            print "Encoded image saved as " + 'encoded_' + args.file
         im.close()
 
     elif args.command == 'decode':
