@@ -2,9 +2,7 @@
 
 from bitarray import bitarray
 from PIL import Image
-from optparse import OptionParser
-import numpy as np
-
+import argparse
 
 def encode_value(value, data):
     if data >= 2 or data < 0: 
@@ -16,11 +14,10 @@ def encode_value(value, data):
         
 
 def get_lsb(byte):
-    # TODO: Should incorporate bits_per_value
     return 0x01 & byte
 
-def bool_to_bin(bool):
-    if bool: 
+def bool_to_bin(boolean):
+    if boolean: 
         return 1
     return 0
 
@@ -54,23 +51,39 @@ def encode_image(im, message):
         new_data.append(tuple(newpixel))        
     im.putdata(new_data) 
 
-def main(): 
-    parser = OptionParser()
-    parser.add_option("-f", "--file", dest="filename")
-    parser.add_option("-m", "--message", dest="message")
-    (options, args) = parser.parse_args()
+def main():
+    parser = argparse.ArgumentParser()
+    
+    subparsers = parser.add_subparsers(dest='command')
 
-    im = Image.open(options.filename)
-    
-    if 'encode' in args:
-        encode_image(im, options.message)
-        im.save('encoded_' + options.filename)
+    parser_decode = subparsers.add_parser('decode')
+    parser_decode.add_argument("file", help="PNG file to encode or decode")
 
-    if 'decode' in args:
-        print decode_image(im)[:100]
+    parser_encode = subparsers.add_parser('encode')
+    parser_encode.add_argument("-o", "--outputfile", help="Specify output file for endoded Image")
+    parser_encode.add_argument("file", help="PNG file to encode or decode")
+    parser_encode.add_argument("message", help="Message to encode")
+
+    args = parser.parse_args()
     
-    im.close()
-    
+    if args.command == 'encode':
+        im = Image.open(args.file)
+        im = im.convert('RGB')
+
+        encode_image(im, args.message)
+
+        if args.outputfile:
+            im.save(args.outputfile, compress_level=0)
+        else:
+            im.save('encoded_' + args.file, compress_level=0)
+
+        im.close()
+
+    elif args.command == 'decode':
+        im = Image.open(args.file)
+        im = im.convert('RGB')
+        print decode_image(im)
+        im.close()
+      
 if __name__ == '__main__':
     main()
-
