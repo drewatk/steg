@@ -57,11 +57,11 @@ def main():
     subparsers = parser.add_subparsers(dest='command')
 
     parser_decode = subparsers.add_parser('decode')
-    parser_decode.add_argument("file", help="PNG file to encode or decode")
+    parser_decode.add_argument("file", help="PNG file to decode")
 
     parser_encode = subparsers.add_parser('encode')
     parser_encode.add_argument("-o", "--outputfile", help="Specify output file for endoded Image")
-    parser_encode.add_argument("file", help="PNG file to encode or decode")
+    parser_encode.add_argument("file", help="PNG file to encode")
     parser_encode.add_argument("message", help="Message to encode")
 
     args = parser.parse_args()
